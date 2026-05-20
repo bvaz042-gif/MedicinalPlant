@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medicinal Plants</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2e7d32">
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+<style>
+body {
+	margin:0;
+	font-family:Arial;
+	background:#000000;
+}
+
+.screen {
+	display:none;
+	max-width:600px;
+	margin:auto;
+	background:rgb(197, 215, 216);
+	height:100vh;
+	flex-direction:column;
+}
+
+.active { display:flex; }
+
+.content { padding:20px; text-align:center; }
+
+.card {
+	background:#ace6cf;
+	padding:15px;
+	margin:10px;
+	border-radius:15px;
+	cursor:pointer;
+	display:flex;
+	gap:10px;
+	align-items:center;
+}
+
+.bottom-nav {
+	display:flex;
+	justify-content:space-around;
+	background:#eee;
+	padding:10px;
+}
+
+.center-btn {
+	background:#75dab1;
+	color:white;
+	padding:15px;
+	border-radius:50%;
+	cursor:pointer;
+}
+
+img { max-width:100%; }
+
+video { width:100%; }
+</style>
+
+<body>
+
+<!-- 🌿 PANTALLA 1 -->
+<div id="screen1" class="screen active">
+	<div class="content">
+		<h1>Medicinal Plants 🌿</h1>
+		<p>Descubre plantas con inteligencia artificial</p>
+		<button onclick="show('screen2')">Continuar</button>
+	</div>
+</div>
+
+<!-- 🌿 PANTALLA 2 -->
+<div id="screen2" class="screen">
+	<div class="content">
+		<h2>Condiciones</h2>
+		<p>	
+			1. Esta aplicación te permite conocer los beneficios y valores nutricionales de las plantas.
+            <br><br>
+			2. Para utilizar esta aplicación, debe respetar las siguientes reglas:
+			<br><br>
+			3. Debe respetar las opiniones, preguntas y sugerencias de otros usuarios.
+			<br><br>
+			4. Antes de publicar información, verifique la veracidad antes de compartirla.
+			<br><br>
+			Si no cumple las reglas, puede ser bloqueado.
+			<br><br>
+			Haga clic en <b>aceptar</b> para continuar.
+		</p>
+
+		<button onclick="show('screen3')">Aceptar</button>
+	</div>
+</div>
+
+<!-- 🌿 PANTALLA 3 -->
+<div id="screen3" class="screen">
+	<div class="content">
+
+		<div class="card" onclick="openCamera()">📷 Identificar planta</div>
+		<div class="card" onclick="openIA()">🔍 Preguntar a IA</div>
+		<div class="card" onclick="mostrarCatalogo()">🌿 Catálogo</div>
+
+	</div>
+
+	<div class="bottom-nav">
+		<div onclick="show('screen3')">🏠Inicio🏠</div>
+		<div class="center-btn" onclick="openCamera()">📷Camara📷</div>
+		<div onclick="openIA()">❓preguntar❓</div>
+	</div>
+</div>
+
+<!-- 📷 CÁMARA -->
+<div id="screen4" class="screen">
+	<video id="video" autoplay playsinline></video>
+	<canvas id="canvas" style="display:none;"></canvas>
+
+	<div class="content">
+		<button onclick="takePhoto()">📸 Capturar</button>
+	</div>
+</div>
+
+<!-- 🔍 CARGA -->
+<div id="screen5" class="screen">
+	<div class="content"><h2>Identificando...</h2></div>
+</div>
+
+<!-- 🌿 RESULTADO -->
+<div id="screen6" class="screen">
+	<div class="content">
+		<h2 id="resultado"></h2>
+		<button onclick="show('screen3')">Volver</button>
+	</div>
+</div>
+
+<!-- 🌿 CATÁLOGO -->
+<div id="screen7" class="screen">
+	<div class="content">
+		<h2>🌿Plantas Medicinales en la región🌿</h2>
+		<div id="lista"></div>
+	</div>
+	<div class="bottom-nav">
+        <button onclick="show('screen3')">
+            ← Regresar al inicio
+        </button>
+    </div>
+</div>
+
+<!-- 🌿 DETALLE -->
+<div id="screen8" class="screen">
+	<img id="detalleImg">
+	<div class="content">
+		<h2 id="detalleNombre"></h2>
+		<div id="descripcion"></div>
+		<button onclick="show('screen7')">← Volver</button>
+	</div>
+</div>
+
+<!-- 🤖 IA -->
+<div id="screen9" class="screen">
+	<div class="content">
+		<input id="pregunta" placeholder="Pregunta sobre una planta">
+		<button onclick="preguntarIA()">Preguntar</button>
+		<p id="respuesta"></p>
+		<button onclick="show('screen3')">← Volver</button>
+	</div>
+</div>
+
+<script>
+
+/* ================= NAV ================= */
+function show(id){
+	document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+	document.getElementById(id).classList.add("active");
+}
+
+/* ================= CÁMARA ================= */
+let stream;
+
+function openCamera(){
+    show("screen4");	
+    navigator.mediaDevices.getUserMedia({
+        video:{
+            facingMode:{ ideal:"environment" }
+        }
+    })
+    .then(s=>{
+        stream = s;
+        const video = document.getElementById("video");
+        video.srcObject = s;
+        video.play();
+    })
+    .catch(err=>{
+        alert("Error de cámara: " + err.message);
+        console.log(err);
+    });
+}
+
+async function takePhoto(){
+
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    // verificar cámara
+    if(video.videoWidth === 0){
+        alert("La cámara no está lista");
+        return;
+    }
+
+    // capturar imagen
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video,0,0);
+    const blob = await new Promise(resolve =>
+        canvas.toBlob(resolve,"image/jpg") 
+    );
+
+    // detener cámara
+    if(stream){
+        stream.getTracks().forEach(t => t.stop());
+    }
+    show("screen5");
+
+    // TU API KEY
+	const API_KEY = "2b1013D7FFmEp5FXPdwK6FD2";
+    const formData = new FormData();
+    formData.append("images", blob);x
+
+	// detectar automáticamente
+    formData.append("organs", "auto");
+
+    try{
+
+        const res = await fetch(
+            `https://my-api.plantnet.org/v2/identify/all?api-key=${API_KEY}`,
+            {
+                method:"POST",
+                body:formData
+            }
+        );
+
+        // verificar respuesta
+        if(!res.ok){
+            throw new Error("Error servidor");
+        }
+        const data = await res.json();
+        console.log(data);
+        // NO encontró planta
+        if(!data.results || data.results.length === 0){
+            document.getElementById("resultado").innerHTML = `
+                ❌ Planta no encontrada
+            `;
+            show("screen6");
+            return;
+        }
+
+        // nombre científico API
+        const nombreAPI =
+        data.results[0]
+        .species
+        .scientificNameWithoutAuthor
+        .toLowerCase();
+
+        // buscar en catálogo
+        const plantaEncontrada = plantas.find(p =>
+            nombreAPI.includes(
+                p.cientifico.toLowerCase()
+            )
+            ||
+            p.cientifico
+            .toLowerCase()
+            .includes(nombreAPI)
+        );
+
+        // SI EXISTE EN TU CATÁLOGO
+        if(plantaEncontrada){
+            // abrir detalle completo
+            verDetalle(plantaEncontrada);
+        }else{
+
+            // detectó planta PERO no está en tu base
+            document.getElementById("resultado").innerHTML = `
+            ⚠️ Planta detectada:
+            <br><br>
+            <b>${nombreAPI}</b>
+            <br><br>
+            No existe en tu catálogo
+            `;
+            show("screen6");
+        }
+    }catch(error){
+        console.log(error);
+        document.getElementById("resultado").innerHTML = `
+        ❌ Error al identificar la planta
+        <br><br>
+        Verifica:
+        <br>
+        • Internet
+        <br>
+        • API KEY
+        <br>
+        • Permisos de cámara
+        `;
+        show("screen6");
+    }
+}
+/* ================= IA ================= */
+function openIA(){
+	show("screen9");
+}
+
+function preguntarIA(){
+
+    const q = document.getElementById("pregunta").value.toLowerCase();
+    const res = document.getElementById("respuesta");
+
+    const planta = plantas.find(p =>
+        q.includes(p.nombre.toLowerCase())
+    );
+
+    if(!planta){
+        res.innerHTML = "❌ No encontrada en la base de datos";
+        return;
+    }
+    res.innerHTML = `
+        <img src="${planta.img}" width="250" style="border-radius:15px; margin:10px 0;">
+        <h2>${planta.nombre}</h2>
+        <p><b>🌿 Nombre científico:</b><br>
+        ${planta.cientifico}</p>
+        <p><b>📝 Descripción:</b><br>
+        ${planta.descripcion}</p>
+        <p><b>💊 Uso:</b><br>
+        ${planta.uso}</p>
+        <p><b>✨ Beneficios:</b><br>
+        ${planta.beneficios.join(", ")}</p>
+        <p><b>☕ Remedio:</b><br>
+        ${planta.remedio}</p>
+        <p><b>🧪 Ingredientes:</b><br>
+        ${planta.ingredientes}</p>
+        <p><b>📌 Opcional:</b><br>
+        ${planta.opcional}</p>
+    `;
+}
+
+/* ================= PLANTAS ================= */
+const plantas = [
+{
+	nombre:"Manzanilla",
+	cientifico:"Matricaria chamomilla",
+	img:"https://www.ecoagricultor.com/wp-content/uploads/2017/05/plantar-manzanilla.png",
+	descripcion:"Es una planta herbácea que se utiliza principalmente seca para preparar té. Es muy valorada por sus efectos suaves y calmantes. ",
+	uso:"Infusión para estrés y sueño, Planta calmante y digestiva.",
+	beneficios:["Relajante","Digestiva","Antiinflamatoria","Mejora el sueño","Alivio de cólicos menstruales"],
+	remedio: "Té de manzanilla." ,
+	ingredientes: "1 cucharada de flores de manzanilla. 1 taza de agua caliente. Hervir el agua. Agregar la manzanilla. Dejar reposar de 5 a 10 minutos. Colar y beber tibio.",
+	ocional:"agregar miel o limón.  Recomendación No consumir en exceso y evitar usarla si eres alérgico a plantas similares como margaritas o crisantemos.",
+},
+{
+	nombre:"Menta",
+	cientifico:"Mentha",
+	img:"https://tse4.mm.bing.net/th/id/OIP.snPE8Dg8D2RPevGFrQOkqwHaE_",
+	descripcion:"Es un género de plantas que crece fácilmente en jardines y macetas. Sus hojas contienen aceites esenciales que le dan su característico sabor refrescante.",
+	uso:"Infusiones y cocina, Refresca y ayuda a la digestión.",
+    beneficios:["Digestiva","Refrescante","Beneficios respiratorios","Beneficios para el sistema nervioso y bienestar","Beneficios cardiovasculares y musculares","Beneficios en la piel y cuidado personal","Usos prácticos."],
+	remedio: "Té de menta",
+    ingredientes:"5 a 10 hojas de menta fresca. 1 taza de agua caliente. Hervir el agua. Agregar las hojas de menta. Dejar reposar 5 minutos. Colar y beber tibio.",
+	ocional:"agregar miel o limón.",
+},
+{
+	nombre:"Romero",
+	cientifico:"Rosmarinus officinalis",
+	img:"https://tse1.mm.bing.net/th/id/OIP.8OHs42WlSvPsNx9Gj1-69QHaE7",
+	descripcion:"Es un arbusto perenne que crece fácilmente en climas cálidos. Sus hojas contienen aceites esenciales con propiedades medicinales.",
+	uso:"Cocina y aceites, Mejora memoria y circulación.",
+	beneficios:["Memoria","Antioxidante","Mejora la digestión","Antiflamatorio","Beneficios cardiovasculares","Cuidado de la piel y cabello"],
+	remedio: "Té de romero",
+    ingredientes: "1 rama pequeña de romero o 1 cucharadade hojas. 1taza de agua caliente  ",
+    opcional:"No consumir en exceso y evitar usar grandes cantidades durante el embarazo.",
+},
+{
+	nombre:"Lavanda",
+	cientifico:"Lavandula",
+	img:"https://www.koldourizarbarrena.com/wp-content/uploads/2021/09/como-cuidar-la-lavanda.jpg",
+	descripcion:"Es una planta aromática de flores moradas o lilas, muy conocida por su olor relajante y su uso en medicina natural y perfumería.",
+	uso:"Infusiones y aromaterapia.",
+	beneficios:["Relajante","Antiestrés","Mejora del sueño","Alivio de dolores y molestias","Beneficios digestivos","Cuidado de la piel",],
+    remedio: "Té de lavanda",
+    ingredientes: "1 cucharada de flores de lavanda. 1 taza de agua caliente",
+    opcional:"No consumir en exceso y evitar durante el embarazo sin consultar a un especialista.",
+},
+{
+	nombre:"Sabila",
+	cientifico:"Aloe vera",
+	img:"https://th.bing.com/th/id/R.7645fb5a48a39a5b840599bcde0ae29c?rik=ejk8QkvL7Ay%2fvg&riu=http%3a%2f%2f2.bp.blogspot.com%2f-M_l0icgcXqg%2fTgD1IVbduWI%2fAAAAAAAAAA4%2f_Kt9tme0soM%2fs1600%2faloe_vera_planta.jpg&ehk=WyjFyWCWprsiebzLse08q63Cx7Pmaj6yew1JmdXb5IY%3d&risl=&pid=ImgRaw&r=0",
+	descripcion:"Es una planta que almacena agua en sus hojas y produce un gel natural rico en compuestos beneficiosos para la piel y el cuerpo.",
+	uso:"Gel para piel y cabello.",
+	beneficios:["Cicatrizante","Hidratante","Hidratación de la piel","Ayuda en la Digestión","Salud ocular."],
+    remedio: "Bebida de sábila",
+    ingredientes: "Gel transparente de una hoja de sábila. 1 vaso de agua o jugo natural.",
+    opcional:"No consumir en exceso porque puede causar malestar estomacal.",
+},
+{
+	nombre:"Eucalipto",
+	cientifico:"Eucalyptus globulus",
+	img:"https://tse2.mm.bing.net/th/id/OIP.IpFRiXUQlCi-NwqYbLXIqwHaE6?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"Es un árbol originario de Australia, pero hoy se encuentra en muchas regiones del mundo. Sus hojas contienen aceites esenciales con efectos medicinales.",
+	uso:"Infusiones y aceites esenciales, Alivia congestión y mejora respiración.",
+	beneficios:["Descongestionante","Antiséptico","Antioxidante","Antiinflamatorio"],
+    remedio: "Vapor de eucalipto",
+    ingredientes: "Unas hojas de eucalipto.Agua caliente.",
+    opcional:"Tener cuidado con el vapor caliente para evitar quemaduras.",
+},
+{
+	nombre:"Caléndula",
+	cientifico:"Calendula officinalis",
+	img:"https://tse4.mm.bing.net/th/id/OIP.6aP3vBwVVaoPNFuMDgYldwHaFj?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"Es una planta herbácea que se cultiva en jardines y huertos. Sus flores se utilizan frescas o secas en remedios naturales, cremas y aceites.",
+	uso:"Pomadas y cremas para piel, Cura heridas y alivia inflamación.",
+	beneficios:["Cicatrizante","Antiinflamatoria","Antioxidante","Antiarrugas","Antibacteriana"],
+    remedio: "Té de caléndula",
+    ingredientes: "1 cucharada de flores de caléndula. 1 taza de agua caliente.",
+    opcional:"No consumir en exceso y suspender su uso si causa alergia.",
+},
+{
+	nombre:"Valeriana",
+	cientifico:"Valeriana officinalis",
+	img:"https://tse4.mm.bing.net/th/id/OIP.b61EtSZ3yQPi5RtDzz8TgAHaEK?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"Es una planta medicinal conocida principalmente por su efecto sedante y relajante. Su raíz es la parte que más se utiliza en remedios naturales.",
+	uso:"Infusiones antes de dormir, Ayuda a dormir y reduce ansiedad.",
+	beneficios:["Sedante","Antiestrés","Antidepresivo","Antidepresivo"],
+    remedio: "Té de valeriana",
+    ingredientes: "1 cucharadita de raíz de valeriana. 1 taza de agua caliente.",
+    opcional:"No consumir en exceso porque puede causar sueño.",
+},
+{
+	nombre:"Ginseng",
+	cientifico:"Panax ginseng",
+	img:"https://tse3.mm.bing.net/th/id/OIP.Ye1PBhEycuG2Y-zClpjiNAHaE-?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"Es una planta de raíz carnosa que crece lentamente y se considera un “adaptógeno”, es decir, ayuda al cuerpo a adaptarse al estrés físico y mental.",
+	uso:"Suplementos y tés energéticos, Mejora energía y concentración.",
+	beneficios:["Energizante","Mejora concentración","Reducción del Estrés y la Ansiedad","Fortalecimiento del Sistema Inmunológico"],
+    remedio: "Té de ginseng",
+    ingredientes: "1 trozo pequeño de raíz de ginseng. 1 taza de agua caliente.",
+    opcional:"Evitar consumir por la noche.",
+},
+{
+	nombre:"Árnica",
+	cientifico:"Arnica montana",
+	img:"https://tse2.mm.bing.net/th/id/OIP.ZB_02W5Cn4mCNJh4zYnzhAHaFj?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"Planta medicinal con efecto antiinflamatorio y analgésico, utilizada principalmente de forma tópica. Es comúnmente aplicada en casos de contusiones, esguinces, dolores musculares y artritis para aliviar el dolor y reducir la inflamación.",
+	uso:"Se emplea en pomadas, geles o compresas para golpes, moretones y dolores musculares. No se recomienda su consumo oral sin supervisión médica debido a posibles efectos secundarios.",
+	beneficios:["Antiinflamatoria","Analgésica","Alivia contusiones y dolores musculares","Reduce moretones"],
+    remedio: "Infusión de árnica",
+    ingredientes: "Flores de árnica. 1 taza de agua caliente.",
+    opcional:"No beber la infusión.",
+},
+{
+	nombre:"Epazote",
+	cientifico:"Dysphania ambrosioides",
+	img:"https://garden.org/pics/2018-04-25/robertduval14/78aec3.jpg",
+	descripcion:"El epazote es una planta aromática originaria de México, conocida por su sabor fuerte y sus propiedades medicinales. Tradicionalmente se ha utilizado para aliviar problemas digestivos como gases, cólicos y parásitos intestinales. Además, el epazote tiene propiedades antiinflamatorias y se ha empleado para tratar afecciones respiratorias y menstruales.",
+	uso:"Se utiliza en infusiones y extractos para tratar problemas digestivos y respiratorios.",
+	beneficios:["Alivia gases y cólicos","Combate parásitos intestinales","Reduce inflamación respiratoria","Ayuda en trastornos menstruales"],
+    remedio: "Té de epazote",
+    ingredientes: "Unas hojas de epazote. 1 taza de agua caliente.",
+    opcional:"No consumir en exceso.",
+},
+{
+	nombre:"Bugambilia",
+	cientifico:"Bougainvillea",
+	img:"https://tse3.mm.bing.net/th/id/OIP.qbEtEccBmWvd4bPb1s_t8AHaFj?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"La Bugambilia es una planta ornamental conocida por sus vibrantes flores, pero también tiene propiedades medicinales. Tradicionalmente se ha utilizado para tratar problemas respiratorios, como resfriados y tos, debido a sus propiedades expectorantes. Además, se cree que la bugambilia tiene efectos antiinflamatorios y antioxidantes, lo que la hace útil para aliviar dolores musculares y mejorar la salud de la piel.",
+	uso:"Se emplea en infusiones para tratar resfriados y como tópico para aliviar dolores musculares y mejorar la piel.",
+	beneficios:["ayuda a aliviar irritación de garganta","Alivia la tos","Alivia dolores musculares"],
+    remedio: "Té de bugambilia",
+    ingredientes: "Flores de bugambilia. 1 taza de agua caliente.",
+    opcional:"Consumir moderadamente.",
+},
+{
+	nombre:"Nopal",
+	cientifico:"Opuntia ficus-indica",
+	img:"https://th.bing.com/th/id/R.e9c18095c2c68cf9e03cb9a8027020c5?rik=%2fnq97Usm%2f54sQA&riu=http%3a%2f%2franchonatura.com%2fwp-content%2fuploads%2f2018%2f06%2fnopales.jpg&ehk=1fh2h7T7nNP9qlFVQYopCxX320Ajk2c2cFz4K97ZBOY%3d&risl=&pid=ImgRaw&r=0",
+	descripcion:"El nopal es una planta suculenta originaria de México, conocida por sus propiedades medicinales y nutricionales. Es rico en fibra, vitaminas y minerales, lo que lo convierte en un alimento beneficioso para la salud. El nopal se ha utilizado tradicionalmente para ayudar a controlar los niveles de azúcar en la sangre, mejorar la digestión y reducir el colesterol. Además, tiene propiedades antiinflamatorias y antioxidantes, lo que puede contribuir a la salud cardiovascular y al bienestar general.",
+	uso:"Se consume en ensaladas, jugos y suplementos para controlar azúcar, mejorar digestión y reducir colesterol.",
+	beneficios:["Controla azúcar en sangre","Mejora digestión","Reduce colesterol","Propiedades antiinflamatorias y antioxidantes"],
+	remedio: "Jugo de nopal",
+    ingredientes: "1 nopal limpio. 1 vaso de agua",
+	opcional: "Consumir recién preparado."
+},
+{
+	nombre:"Diente de leon",
+	cientifico:"Taraxacum officinale",
+	img:"https://th.bing.com/th/id/R.19c781297d5474a0ce788ffe324146ae?rik=dQ%2frDvqqBZGK%2bQ&riu=http%3a%2f%2fwww.hospitalveterinarioasturias.com%2fwp-content%2fuploads%2f2019%2f02%2fHVA-dientedeleon-perros-1.jpg&ehk=URf2mQhJblc4OKp%2bCkB39ukq5I9kt7TS%2fb8HWZ34zlE%3d&risl=&pid=ImgRaw&r=0",
+	descripcion:"El diente de león es una planta medicinal conocida por sus propiedades depurativas y digestivas. Tradicionalmente se ha utilizado para apoyar la función del hígado, estimular la digestión y ayudar a eliminar toxinas del organismo. Contiene vitaminas, minerales y compuestos antioxidantes que favorecen la salud general",
+	uso:"Se consume en forma de infusiones, jugos, ensaladas o extractos para mejorar la digestión, apoyar el hígado y actuar como diurético natural.",
+	beneficios:["Diurético","Depurativo","Mejora la digestión","Apoya la salud del hígado","Antioxidante"],
+	remedio: "Té de bugambilia",
+    ingredientes: "1 cucharada de hojas secas.1 taza de agua caliente.",
+    opcional:"No consumir en exceso.",
+},
+{
+	nombre:"Cola de caballo",
+	cientifico:"Equisetum arvense",
+	img:"https://tse2.mm.bing.net/th/id/OIP.C-6jUsLZV1CBMJSEZmf5mgHaE8?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"La cola de caballo es una planta medicinal rica en minerales, especialmente silicio, conocida por sus propiedades diuréticas y regeneradoras. Tradicionalmente se utiliza para fortalecer huesos, uñas y cabello, además de ayudar en la eliminación de líquidos.",
+	uso:"Se consume en infusiones o extractos para tratar la retención de líquidos, fortalecer el cabello y apoyar la salud ósea.",
+	beneficios:["Diurética","Fortalece huesos","Mejora cabello y uñas","Depurativa"],
+	remedio: "Té de cola de caballo",
+    ingredientes: "1 cucharada de cola de caballo. 1 taza de agua caliente.",
+    opcional:"Consumir moderadamente.",
+},
+{
+	nombre:"Toronjil",
+	cientifico:"Melissa officinalis",
+	img:"https://tse1.mm.bing.net/th/id/OIP.fscylKRqM1c3otVLUWepqgHaFj?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"El toronjil es una planta medicinal con propiedades relajantes y calmantes. Se ha utilizado tradicionalmente para reducir el estrés, la ansiedad y favorecer el descanso, además de ayudar en problemas digestivos leves.",
+	uso:"Se consume en infusiones para aliviar el estrés, la ansiedad, mejorar el sueño y apoyar la digestión.",
+	beneficios:["Relajante","Ansiolítica","Mejora el sueño","Digestiva"],
+	remedio: "Consumir moderadamente.",
+    ingredientes: "Hojas de toronjil. 1 taza de agua caliente.",
+    opcional:"ayuda a relajarse",
+	
+},
+{
+	nombre:"Malva",
+	cientifico:"Malva sylvestris",
+	img:"https://thumbs.dreamstime.com/b/wild-mallow-summer-garden-common-mallow-malva-sylvestris-pink-wild-flower-wild-mallow-althaea-officinalis-malva-sylvestris-197929574.jpg",
+	descripcion:"La malva es una planta medicinal conocida por sus propiedades suavizantes y antiinflamatorias. Tradicionalmente se utiliza para aliviar afecciones respiratorias y digestivas, así como irritaciones en la piel.",
+	uso:"Se consume en infusiones o se aplica de forma tópica para aliviar tos, irritaciones y problemas digestivos.",
+	beneficios:["Antiinflamatoria","Suavizante","Alivia la tos","Protege mucosas"],
+	remedio: "Té de malva",
+    ingredientes: "Flores o hojas de malva.1 taza de agua caliente.",
+    opcional:"Consumir moderadamente.",
+},
+{
+	nombre:"Estafiate",
+	cientifico:"Artemisia ludoviciana",
+	img:"https://tse3.mm.bing.net/th/id/OIP.-9Q8UCf-xvmkqWjlfFL1OAHaFj?w=1200&h=900&rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"El estafiate es una planta medicinal utilizada tradicionalmente para tratar problemas digestivos y parasitarios. Es conocida por sus propiedades antiinflamatorias y analgésicas leves.",
+	uso:"Se consume en infusión para aliviar dolores estomacales, cólicos y combatir parásitos intestinales",
+	beneficios:["Digestiva","Antiparasitaria","Antiinflamatoria","Alivia cólicos"],
+	remedio: "Té de estafiate",
+    ingredientes: "Unas hojas de estafiate. 1 taza de agua caliente.",
+    opcional:"No consumir en exceso.",
+},
+{
+	nombre:"Muicle",
+	cientifico:"Justicia spicigera",
+	img:"https://www.cocinadelirante.com/filters:format(webp):quality(75)/sites/default/files/styles/gallerie/public/que-es-el-muicle-sub1.jpg",
+	descripcion:"El muicle es una planta medicinal conocida por sus propiedades antioxidantes y depurativas. Tradicionalmente se ha utilizado para mejorar la circulación, fortalecer la sangre y apoyar la salud general.",
+	uso:"Se consume en infusiones o como extracto para apoyar la circulación, depurar el organismo y fortalecer la sangre.",
+	beneficios:["Antioxidante","Depurativo","Mejora la circulación","Fortalece la sangre"],
+	remedio: "Té de muicle",
+    ingredientes: "Hojas de muicle. 1 taza de agua caliente.",
+    opcional:"Consumir moderadamente.",
+},
+{
+	nombre:"Ortiga",
+	cientifico:"Urtica dioica",
+	img:"https://img.freepik.com/fotos-premium/arbusto-ortiga-comun-al-aire-libre-urtica-dioica-planta-ortigas-punzantes-concepto-medicina-herbaria-fondo-follaje-verde-patron-hojas-oscuras-noche-vista-superior-primer-plano-vegetacion-botanica_156843-1329.jpg?w=900",
+	descripcion:"La ortiga es una planta medicinal rica en vitaminas y minerales, conocida por sus propiedades antiinflamatorias y depurativas. Tradicionalmente se utiliza para mejorar la circulación, fortalecer el sistema inmunológico y aliviar dolores articulares.",
+	uso:"Se consume en infusiones o extractos para apoyar la circulación, reducir la inflamación y fortalecer el organismo.",
+	beneficios:["Antiinflamatoria","Depurativa","Mejora la circulación","Fortalece el sistema inmunológico"],
+	remedio: "Té de ortiga",
+    ingredientes: "1 cucharada de hojas de ortiga. 1 taza de agua caliente.",
+    opcional:"Manipular con cuidado las hojas frescas.",
+},
+{
+	nombre:"Ánis",
+	cientifico:"Pimpinella anisum",
+	img:"https://fitoterapiacampos.com/wp-content/uploads/2022/05/aniii.jpg",
+	descripcion:"El anís es una planta medicinal reconocida por sus propiedades digestivas y carminativas. Se ha utilizado tradicionalmente para aliviar gases, cólicos y mejorar la digestión.",
+	uso:"Se consume en infusión o como semilla para aliviar problemas digestivos como gases y cólicos.",
+	beneficios:["Digestivo","Carminativo","Alivia gases","Reduce cólicos"],
+	remedio: "Té de anís",
+    ingredientes: "1 cucharadita de semillas de anís. 1 taza de agua caliente.",
+    opcional:"No consumir en exceso.",
+},
+{
+	nombre:"Hinojo",
+	cientifico:"Foeniculum vulgare",
+	img:"https://tse3.mm.bing.net/th/id/OIP.K_vngk2aw2oYTMF7-rvaVgHaEK?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"El hinojo es una planta medicinal con propiedades digestivas y antioxidantes. Tradicionalmente se emplea para aliviar problemas estomacales, reducir la inflamación y mejorar la digestión.",
+	uso:"Se consume en infusiones o como alimento para mejorar la digestión y aliviar molestias estomacales.",
+	beneficios:["Digestivo","Antioxidante","Alivia molestias estomacales","Reduce inflamación"],
+	remedio: "Té de hinojo",
+    ingredientes: "1 cucharadita de semillas de hinojo. 1 taza de agua caliente.",
+    opcional:"Consumir moderadamente.",
+},
+{
+	nombre:"Laurel",
+	cientifico:"Laurus nobilis",
+	img:"https://i.etsystatic.com/18236775/r/il/dbea8e/4204567463/il_340x270.4204567463_322k.jpg",
+	descripcion:"El laurel es una planta medicinal conocida por sus propiedades digestivas y antiinflamatorias. Se ha utilizado tradicionalmente para aliviar problemas estomacales y mejorar la circulación.",
+	uso:"Se consume en infusión o como condimento para apoyar la digestión y aliviar molestias estomacales.",
+	beneficios:["Digestivo","Antiinflamatorio","Mejora la circulación","Alivia molestias estomacales"],
+	remedio: "Té de laurel",
+    ingredientes: "2 hojas de laurel. 1 taza de agua caliente.",
+    opcional:"No consumir en exceso.",
+},
+{
+	nombre:"Jengibre",
+	cientifico:"Zingiber officinale",
+	img:"https://tse1.explicit.bing.net/th/id/OIP.jb2btpwmTH4hOH4l8ntX4wHaE8?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"El jengibre es una raíz medicinal conocida por sus propiedades antiinflamatorias y digestivas. Tradicionalmente se utiliza para aliviar náuseas, mejorar la digestión y fortalecer el sistema inmunológico.",
+	uso:"Se consume en infusiones o como alimento para aliviar náuseas y mejorar la digestión.",
+	beneficios:["Antiinflamatorio","Digestivo","Fortalece el sistema inmunológico","Alivia náuseas"],
+	remedio: "Té de jengibre",
+    ingredientes: "1 trozo pequeño de jengibre. 1 taza de agua caliente.",
+    opcional:"Puede agregarse limón o miel.",
+},
+{
+	nombre:"Ajo",
+	cientifico:"Allium sativum",
+	img:"https://tse1.explicit.bing.net/th/id/OIP.4H7s6DD9KTS2N-VtLAUp6gHaEo?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"El ajo es un alimento con propiedades medicinales reconocido por sus efectos antibacterianos y cardiovasculares. Tradicionalmente se utiliza para fortalecer el sistema inmunológico, mejorar la circulación y ayudar a reducir la presión arterial.",
+	uso:"Se consume en infusiones o como alimento para apoyar el sistema inmunológico y mejorar la circulación.",
+	beneficios:["Antibacteriano","Cardiovascular","Fortalece el sistema inmunológico","Mejora la circulación"],
+	remedio: "Remedio de ajo",
+    ingredientes: "1 diente de ajo. 1 vaso de agua tibia.",
+    opcional:"Consumir en poca cantidad.",
+},
+{
+	nombre:"Perejil",
+	cientifico:"Petroselinum crispum",
+	img:"https://3.bp.blogspot.com/-csP_a9AvfHM/Uu7DjzGVYKI/AAAAAAAAGrs/VP9zIY3562I/s1600/perejil-rizado1.jpg",
+	descripcion:"El perejil es una planta rica en vitaminas y minerales, conocida por sus propiedades diuréticas y antioxidantes. Tradicionalmente se utiliza para apoyar la salud renal y mejorar la digestión..",
+	uso:"Se consume en infusiones o como alimento para apoyar la salud renal y mejorar la digestión.",
+	beneficios:["Diurético","Antioxidante","Apoya la salud renal","Mejora la digestión"],
+	remedio: "Té de perejil",
+    ingredientes: "Unas ramas de perejil. 1 taza de agua caliente.",
+    opcional:"No consumir en exceso.",
+},
+{
+	nombre:"Tomillo", 
+	cientifico:"Thymus vulgaris",
+	img:"https://th.bing.com/th/id/R.935fce56496b86a19d4ef933fedfdd02?rik=FLVn8SoUONDNbw&pid=ImgRaw&r=0",
+	descripcion:"El tomillo es una planta medicinal con propiedades antibacterianas y expectorantes. Se ha utilizado tradicionalmente para tratar afecciones respiratorias y fortalecer el sistema inmunológico.",
+	uso:"Se consume en infusiones o como alimento para tratar afecciones respiratorias y fortalecer el sistema inmunológico.",
+	beneficios:["Alivia afecciones respiratorias","Antibacteriano","Fortalece el sistema inmunológico","Combate el acné","cuida la piel","Mejora la circulación"],
+	remedio: "Té de tomillo",
+    ingredientes: "1 cucharadita de tomillo. 1 taza de agua caliente.",
+    opcional:"Puede mezclarse con miel.",
+},
+{
+	nombre:"Salvia",
+	cientifico:"Salvia officinalis",
+	img:"https://tse3.mm.bing.net/th/id/OIP.cn00Nciv7WLvsrM93epHLAHaFN?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"La salvia es una planta medicinal conocida por sus propiedades antiinflamatorias y digestivas. Tradicionalmente se utiliza para aliviar problemas digestivos, dolores de garganta y síntomas hormonales.",
+	uso:"Se consume en infusión o como enjuague para aliviar molestias digestivas, dolor de garganta y apoyar el equilibrio hormonal.",
+	beneficios:["Propiedades antioxidantes y cognitivas","Beneficios para piel y cabello","Propiedades digestivas y metabólicas","Nutrientes y composición"],
+	remedio: "Té de salvia",
+    ingredientes: "Hojas de salvia. 1 taza de agua caliente.",
+    opcional:"Consumir moderadamente.",
+},
+{
+	nombre:"Hoja de guayaba",
+	cientifico:"Psidium guajava",
+	img:"https://tse2.mm.bing.net/th/id/OIP.uIUqqDB8sfypJ1Ro0d7xPQHaEv?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"La hoja de guayaba es una planta medicinal conocida por sus propiedades antimicrobianas y digestivas. Se ha utilizado tradicionalmente para tratar problemas gastrointestinales como diarrea y dolor estomacal.",
+	uso:"Se consume en infusiones o como alimento para tratar problemas gastrointestinales.",
+	beneficios:["Antimicrobiana","Digestiva","Alivia diarrea","Reduce dolor estomacal"],
+	remedio: "Té de hoja de guayaba",
+    ingredientes: "5-7 hojas frescas o 1 cucharadita de hojas secas de guayaba. 1 taza de agua.",
+    opcional:"Consumir máximo 2 tazas al día .",
+},
+{
+	nombre:"Limón",
+	cientifico:"Citrus limon",
+	img:"https://tse4.mm.bing.net/th/id/OIP.4UJvhlp4tnnQncZ35BE8fQHaE8?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"El limón es un fruto con propiedades medicinales gracias a su alto contenido de vitamina C y antioxidantes. Tradicionalmente se utiliza para fortalecer el sistema inmunológico, mejorar la digestión y desintoxicar el organismo.",
+	uso:"Se consume en infusiones, jugos o como condimento para apoyar el sistema inmunológico, mejorar la digestión y desintoxicar el organismo.",
+	beneficios:["Antioxidante","Rico en vitamina C","Fortalece el sistema inmunológico","Mejora la digestión"],
+	remedio: "Té de limón",
+    ingredientes: "3-4 hojas frescas o 1 rodaja fina de limón. 1 taza de agua caliente.",
+    opcional:"No exceder 2 tazas diarias; evitar en gastritis.",
+},
+{
+	nombre:"Siempre viva",
+	cientifico:"Helichrysum stoechas",
+	img:"https://nuestraflora.com/wp-content/uploads/2019/09/siempreviva-5.jpg",
+	descripcion:"La siempre viva es una planta medicinal conocida por sus propiedades antiinflamatorias y cicatrizantes. Tradicionalmente se utiliza para tratar afecciones de la piel y aliviar irritaciones internas.",
+	uso:"Se consume en infusiones o se aplica de forma tópica para aliviar inflamaciones, heridas y problemas cutáneos.",
+	beneficios:["Antiinflamatoria","Cicatrizante","Alivia irritaciones","Regenera la piel"],
+	remedio: "Té de siempreviva",
+    ingredientes: "1 cucharada de flores o hojas secas.1 taza de agua.",
+    opcional:"Usar por periodos cortos; consultar si hay problemas hepáticos.",
+},
+{
+	nombre:"Marrubio",
+	cientifico:"Marrubium vulgare",
+	img:"https://tse4.mm.bing.net/th/id/OIP.PfPvq1V7--R_5e6_Kp4sVAHaEK?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"El marrubio es una planta medicinal reconocida por sus propiedades expectorantes y digestivas. Se ha utilizado tradicionalmente para tratar afecciones respiratorias como la tos y problemas digestivos.",
+	uso:"Se consume en infusiones para tratar afecciones respiratorias y problemas digestivos.",
+	beneficios:["Expectorante","Digestiva","Alivia la tos","Reduce problemas digestivos"],
+	remedio: "Té de marrubio",
+    ingredientes: "1 cucharadita de hojas secas o 3-4 frescas. 1 taza de agua.",
+    opcional:"Máximo 2 tazas al día; no usar en embarazo .",
+},
+{
+	nombre:"Prodigiosa",
+	cientifico:"Brickellia cavanillesii",
+	img:"https://4.bp.blogspot.com/-6PtGMqNJJLc/WdoCMqL_AKI/AAAAAAAAAEo/rMbbrCvEOYgceBXI8P0-Nnz7wRn19LvNgCLcBGAs/s1600/20171008_154348.jpg",
+	descripcion:"La prodigiosa es una planta medicinal conocida por sus propiedades digestivas y hepáticas. Tradicionalmente se utiliza para apoyar la función del hígado y mejorar la digestión.",
+	uso:"Se consume en infusiones para apoyar la función del hígado y mejorar la digestión.",
+	beneficios:["Digestiva","Hepática","Apoya la función hepática","Mejora la digestión"],
+	remedio: "Té de prodigiosa",
+    ingredientes: "1 cucharadita de hojas secas. 1 taza de agua.",
+    opcional:"tomar antes de comer; no mezclar con medicamentos para diabetes.",
+},
+{
+	nombre:"Pingüica",
+	cientifico:"Eysenhardtia polystachya",
+	img:"https://tse1.mm.bing.net/th/id/OIP.JfS5keP0YTj2u5bqquaI0gHaFV?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"La pingüica es una planta medicinal con propiedades diuréticas y antiinflamatorias. Se ha utilizado tradicionalmente para tratar problemas urinarios y apoyar la salud de los riñones.",
+	uso:"Se consume en infusiones para tratar problemas urinarios y apoyar la salud de los riñones.",
+	beneficios:["Diurética","Antiinflamatoria","Apoya riñones","Alivia vías urinarias"],
+	remedio: "Té de pingüica",
+    ingredientes: "1 cucharada de hojas o frutos secos. 1 taza de agua.",
+    opcional:"Hasta 2 tazas al día; ayuda al sistema urinario. ",
+},
+{
+	nombre:"Toloache",
+	cientifico:"Datura stramonium", 
+	img:"https://i2.wp.com/www.viviendoencasa.mx/wp-content/uploads/2021/02/que-es-el-toloache-o-floripondio-preparacion.jpg?fit=1024%2C614&ssl=1&is-pending-load=1",
+	descripcion:"El toloache es una planta medicinal tradicional conocida por sus efectos sedantes y analgésicos; sin embargo, también es tóxica y su uso puede ser peligroso si no se controla adecuadamente.",
+	uso:"Se ha utilizado en preparaciones tradicionales bajo supervisión, pero no se recomienda su consumo sin conocimiento especializado debido a su toxicidad.",
+	beneficios:["Sedante","Analgésico","Efectos alucinógenos","Antiflamatorio"],
+	remedio: "Té de toloache",
+    ingredientes: "1 cucharadita de hojas secas (muy poca cantidad).1 taza de agua.",
+    opcional:"Muy tóxico en exceso: solo bajo indicación, 1 taza como máximo; prohibido en niños y embarazo.",
+},
+{
+	nombre:"Tila",
+	cientifico:"Tilia",
+	img:"https://tse1.mm.bing.net/th/id/OIP.JfS5keP0YTj2u5bqquaI0gHaFV?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"La tila es una planta medicinal conocida por sus propiedades relajantes y calmantes. Tradicionalmente se utiliza para reducir el estrés, la ansiedad y favorecer el sueño.",
+	uso:"Se consume en infusión para aliviar nerviosismo, ansiedad y mejorar el descanso.",
+	beneficios:["Relajante","Calmante","Reduce el estrés","Mejora el sueño"],
+	remedio: "Té de tila",
+    ingredientes: "1 cucharada de flores secas. 1 taza de agua.",
+    opcional:"Ideal para dormir; 1-2 tazas al día.",
+},
+{
+	nombre:"Equinacea",
+	cientifico:"Echinacea purpurea",
+	img:"https://tse2.mm.bing.net/th/id/OIP.HWA6nXZnlHFt4IhdVhhXDAHaFj?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"La equinácea es una planta medicinal conocida por sus propiedades inmunoestimulantes. Tradicionalmente se utiliza para fortalecer el sistema inmunológico y prevenir o aliviar infecciones respiratorias.",
+	uso:"Se consume en infusiones o extractos para apoyar el sistema inmunológico.",
+	beneficios:["Inmunoestimulante","Previene infecciones respiratorias","Alivia síntomas de resfriado"],
+	remedio: "Té de equinácea",
+    ingredientes: "1 cucharadita de hojas, flores o raíz seca.1 taza de agua.",
+    opcional:"Usar solo 2-3 semanas seguidas; refuerza defensas .",
+},
+{
+	nombre:"Tepozan",
+	cientifico:"Montanoa tomentosa",
+	img:"https://tse2.mm.bing.net/th/id/OIP.DisPQLhHN4rKZS3KcAR3mQHaFj?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"El tepozan es una planta medicinal utilizada tradicionalmente por sus propiedades antiinflamatorias y cicatrizantes. Se ha empleado para tratar afecciones de la piel y algunas molestias internas.",
+	uso:"Se utiliza en infusión o de forma tópica para aliviar inflamaciones, heridas y problemas cutáneos.",
+	beneficios:["Antiinflamatorio","Cicatrizante","Alivia irritaciones","Regenera la piel"],
+	remedio: "Té de tepozán",
+    ingredientes: "1 cucharada de hojas secas. 1 taza de agua.",
+    opcional:"1-2 tazas al día; ayuda en problemas respiratorios .",
+},
+{
+	nombre:"Hierbabuena",
+	cientifico:"Mentha spicata",
+	img:"https://tse3.mm.bing.net/th/id/OIP.q7yRugjhdW2a0Oe9ccBMoQHaFj?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"La hierbabuena es una planta medicinal conocida por sus propiedades digestivas, antiinflamatorias y relajantes. Tradicionalmente se utiliza para aliviar molestias estomacales, reducir el estrés y fortalecer el sistema inmunológico.",
+	uso:"Se consume en infusiones, como condimento o en extractos para mejorar la digestión, reducir la inflamación y promover la relajación.",
+	beneficios:["Digestiva","Antiinflamatoria","Relajante","Cardiovasculares","Antioxidantes"],
+	remedio: "Té de hierbabuena",
+    ingredientes: "8-10 hojas frescas o 1 cucharadita secas. 1 taza de agua.",
+    opcional:"Fácil digestión; 1-2 tazas al día.",
+},
+{
+	nombre:"Hierba del sapo",
+	cientifico:"Eryngium heterophyllum",
+	img:"https://todoarboles.com/wp-content/uploads/2021/09/hojas-de-encina.jpg",
+	descripcion:"La hierba de sapo es una planta medicinal conocida por sus propiedades para apoyar la salud cardiovascular. Tradicionalmente se utiliza para ayudar a reducir niveles de colesterol y mejorar la circulación.",
+	uso:"Se consume en infusión o extracto para apoyar la circulación y el control del colesterol.",
+	beneficios:["Apoya la salud cardiovascular","Reduce niveles de colesterol","Mejora la circulación"],
+	remedio: " Té de hierba del sapo",
+    ingredientes: "1 cucharadita de planta seca. 1 taza de agua.",
+    opcional:"No más de 2 meses seguidos; ayuda a la digestión.",
+},
+{
+	nombre:"Albahaca",
+	cientifico:"Ocimum basilicum",
+	img:"https://tse2.mm.bing.net/th/id/OIP.VAlhvPmAAIZfZG07G4EJiAHaE8?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"La albahaca es una planta medicinal y aromática conocida por sus propiedades digestivas, antiinflamatorias y relajantes. Tradicionalmente se utiliza para aliviar molestias estomacales, reducir el estrés y fortalecer el sistema inmunológico.",
+	uso:"Se consume en infusiones, como condimento o en extractos para mejorar la digestión, reducir la inflamación y promover la relajación.",
+	beneficios:["Digestiva","Antiinflamatoria","Relajante","Cardiovasculares","Antioxidantes"],
+	remedio: "Té de albahaca",
+    ingredientes: "6-8 hojas frescas o 1 cucharada secas.1 taza de agua.",
+    opcional:"Calma nervios y estómago; 1 taza al día.",
+},
+{
+	nombre:"Oregano",
+	cientifico:"Origanum vulgare",
+	img:"https://tse4.mm.bing.net/th/id/OIP.g9PaX--USRZEt1tD0DnJSgHaE8?rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"El orégano es una planta medicinal y aromática conocida por sus propiedades antibacterianas, antioxidantes y digestivas. Tradicionalmente se utiliza para aliviar problemas respiratorios, mejorar la digestión y fortalecer el sistema inmunológico.",
+	uso:"Se consume en infusiones o como condimento para aprovechar sus propiedades medicinales.",
+	beneficios:["Antibacteriana","Antioxidante","Digestiva","Salud respiratoria","Salud articular y muscular"],
+	remedio: "Té de orégano",
+    ingredientes: "1 ramita fresca o 1 cucharadita seca. 1 taza de agua.",
+    opcional:"Para resfriados y digestión; máximo 2 tazas al día .",
+},
+{
+	nombre:"Chicalote",
+	cientifico:"Argemone mexicana",
+	img:"https://codema.mx/wp-content/uploads/chicalote-para-que-sirve-propiedades-y-usos-de-la-argemone-mexicana.jpg",
+	descripcion:"El chicalote es una planta medicinal conocida por sus propiedades analgésicas, sedantes y antiinflamatorias. Tradicionalmente se ha utilizado para aliviar dolores, calmar la tos y apoyar el descanso.",
+	uso:"Se consume en infusión o preparaciones tradicionales para aliviar el dolor, la tos y favorecer la relajación.",
+	beneficios:["Analgésico","Sedante","Antiinflamatorio","Alivia la tos","Expectorante","Antibiotico natural"],
+	remedio: "26. Té de chicalote",
+    ingredientes: "1 cucharadita de hojas o flores secas.1 taza de agua.",
+    opcional:"Tóxico en dosis altas: muy poca cantidad; prohibido en embarazo y niños.",
+},
+{
+	nombre:"Pericon",
+	cientifico:"Tagetes lucida",
+	img:"https://hablemosdeflores.com/wp-content/uploads/2019/02/mexican-tarragon_1600x.jpg",
+	descripcion:"El pericón es una planta medicinal y aromática conocida por sus propiedades digestivas, antiespasmódicas y relajantes. Tradicionalmente se utiliza para aliviar malestares estomacales, cólicos y nerviosismo.",
+	uso:"Se consume en infusión para mejorar la digestión, aliviar cólicos y reducir el estrés o la ansiedad leve.",
+	beneficios:["Digestivo","Antiespasmódico","Relajante","Reduce cólicos"],
+	remedio: "Té de pericón",
+    ingredientes: "1 cucharadita de hojas secas o 3-4 frescas.1 taza de agua.",
+    opcional:"Para digestión y dolores; moderar consumo.",
+},
+{
+	nombre:"Ajenjo/Hieba Maestra",
+	cientifico:"Artemisia absinthium",
+	img:"https://tse1.mm.bing.net/th/id/OIP.OdvMfwCg-FcvY-HdP3bBdwHaEK?w=650&h=366&rs=1&pid=ImgDetMain&o=7&rm=3",
+	descripcion:"El ajenjo o hierba maestra es una planta medicinal conocida por sus propiedades digestivas y antiparasitarias. Tradicionalmente se utiliza para estimular el apetito, mejorar la digestión y ayudar a eliminar parásitos intestinales.",
+	uso:"Se consume en infusión para estimular el apetito, mejorar la digestión y ayudar a eliminar parásitos intestinales.",
+	beneficios:["Digestivo","Antiparasitario","Estimula el apetito","Antiinflamatorio"],
+	remedio: "Té de ajenjo",
+    ingredientes: "½ cucharadita de hojas secas (muy poco).1 taza de agua.",
+    opcional:"Amargo y fuerte: solo 1 taza al día, por poco tiempo; no usar en embarazo.",
+},
+{
+	nombre:"Uña de gato",
+	cientifico:"Uncaria tomentosa",
+	img:"https://th.bing.com/th/id/R.fdf83eb58fec6d83d30ae8122ab103a0?rik=R7AEDbR%2buHz1Yw&pid=ImgRaw&r=0",
+	descripcion:"La uña de gato es una planta medicinal conocida por sus propiedades antiinflamatorias e inmunoestimulantes. Tradicionalmente se utiliza para fortalecer el sistema inmunológico y apoyar el tratamiento de dolores articulares.",
+	uso:"Se consume en infusión o extracto para fortalecer defensas y ayudar en procesos inflamatorios",
+	beneficios:["Antiinflamatoria","Fortalece el sistema inmunológico","Antioxidante","Apoya articulaciones"],
+	remedio: "Té de uña de gato",
+    ingredientes: "1 cucharadita de corteza o hojas secas. 1 taza de agua.",
+    opcional:"Defensas y articulaciones; no mezclar con medicamentos.",
+},
+{
+	nombre:"Mozoquelite",
+	cientifico:"Bidens pilosa",
+	img:"https://static.inaturalist.org/photos/10186437/medium.jpeg",
+	descripcion:"El mozoqueliote es una planta medicinal tradicional utilizada por sus propiedades digestivas y depurativas. Se ha empleado para aliviar malestares estomacales y apoyar la limpieza del organismo.",
+	uso:"Se consume en infusión para mejorar la digestión y apoyar procesos depurativos del cuerpo.",
+	beneficios:["Digestivo","Depurativo","Antiinflamatorio","Alivia malestares estomacales"],
+	remedio: "Té de mozoquelite",
+    ingredientes: "1 cucharada de hojas frescas o 1 cucharadita secas. 1 taza de agua.",
+    opcional:"Digestivo y diurético; consumir con moderación.",
+},
+{
+	nombre:"Espada de Rey",
+	cientifico:"Dracaena trifasciata",
+	img:"https://th.bing.com/th/id/R.fdf83eb58fec6d83d30ae8122ab103a0?rik=R7AEDbR%2buHz1Yw&pid=ImgRaw&r=0",
+	descripcion:"La espada de rey es una planta medicinal conocida por sus propiedades antiinflamatorias y cicatrizantes. Tradicionalmente se utiliza para tratar heridas, inflamaciones y molestias muscularesSe aplica en cataplasmas o infusión para aliviar inflamaciones, heridas y dolores musculares..",
+	uso:"Se aplica en cataplasmas o infusión para aliviar inflamaciones, heridas y dolores musculares.",
+	beneficios:["Antiinflamatorio","Cicatrizante","Alivia heridas","Apoya molestias musculares"],
+	remedio: "Té de espada del rey",
+    ingredientes: "1 cucharadita de hojas o tallos secos. 1 taza de agua.",
+    opcional:"Usos tradicionales; no exceder dosis.",
+}
+];
+
+/* ================= CATÁLOGO ================= */
+function mostrarCatalogo(){
+	show("screen7");
+
+	const lista = document.getElementById("lista");
+	lista.innerHTML = "";
+
+	plantas.forEach(p=>{
+		lista.innerHTML += `
+		<div class="card" onclick='verDetalle(${JSON.stringify(p)})'>
+			<img src="${p.img}" width="70">
+			<div>
+				<h3>${p.nombre}</h3>
+				<p>${p.cientifico}</p>
+				<p>${p.remedio}</p>
+				<p>${p.opcional}</p>
+			</div>
+		</div>`;
+	});
+}
+
+/* ================= DETALLE ================= */
+function verDetalle(planta){
+    show("screen8");
+    // nombre
+    document.getElementById("detalleNombre")
+    .innerText = planta.nombre;
+    // imagen
+    document.getElementById("detalleImg")
+    .src = planta.img;
+    // información
+    document.getElementById("descripcion")
+    .innerHTML = `
+    <div class="detalle-card">
+        <p>
+        <b>🌿 Nombre científico:</b><br>
+        ${planta.cientifico}
+        </p>
+        <p>
+        <b>📝 Descripción:</b><br>
+        ${planta.descripcion}
+        </p>
+        <p>
+        <b>💊 Uso:</b><br>
+        ${planta.uso}
+        </p>
+        <p>
+        <b>✨ Beneficios:</b><br>
+        ${planta.beneficios.join(", ")}
+        </p>
+        <p>
+        <b>☕ Remedio:</b><br>
+        ${planta.remedio}
+        </p>
+        <p>
+        <b>🧪 Ingredientes:</b><br>
+        ${planta.ingredientes}
+        </p>
+        <p>
+        <b>📌 Opcional:</b><br>
+        ${planta.opcional || "Sin información"}
+        </p>
+    </div>
+    `;
+}
+
+/* ================= PWA ================= */
+if ("serviceWorker" in navigator)
+{
+    navigator.serviceWorker.register("sw.js")
+    .then(() => console.log("Service Worker activo"))
+    .catch(err => console.log("Error:", err));
+}
+
+</script>
+</body>
+</html>

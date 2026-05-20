@@ -1,0 +1,229 @@
+/* ================= RESET ================= */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    background:linear-gradient(to bottom,#e8f5e9,#c8e6c9);
+    color:#1b1b1b;
+}
+
+/* ================= PANTALLAS ================= */
+.screen{
+    display:none;
+    flex-direction:column;
+    justify-content:space-between;
+    max-width:600px;
+    margin:auto;
+    background:white;
+    height:100vh;
+    box-shadow:0 10px 30px rgba(0,0,0,.15);
+    border-radius:20px;
+    overflow:hidden;
+    animation:fade .3s ease;
+}
+
+.active{
+    display:flex;
+}
+
+@keyframes fade{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+/* ================= CONTENIDO ================= */
+.content{
+    padding:20px;
+    text-align:center;
+    overflow-y:auto;
+    flex:1;
+}
+
+h1{
+    color:#2e7d32;
+    font-size:2rem;
+    margin-bottom:15px;
+}
+
+h2{
+    color:#388e3c;
+    margin-bottom:15px;
+}
+
+p{
+    line-height:1.6;
+    color:#555;
+    margin-bottom:10px;
+}
+
+/* ================= BOTONES ================= */
+button{
+    background:#2e7d32;
+    color:white;
+    border:none;
+    padding:14px 24px;
+    border-radius:14px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
+    margin:10px 0;
+}
+
+button:hover{
+    background:#1b5e20;
+    transform:scale(1.03);
+}
+
+button:active{
+    transform:scale(.95);
+}
+
+/* ================= TARJETAS ================= */
+.card{
+    background:#f1f8e9;
+    padding:15px;
+    margin:12px 0;
+    border-radius:20px;
+    cursor:pointer;
+    display:flex;
+    gap:15px;
+    align-items:center;
+    text-align:left;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-4px);
+}
+
+.card img{
+    width:80px;
+    height:80px;
+    object-fit:cover;
+    border-radius:12px;
+}
+
+.card h3{
+    color:#2e7d32;
+}
+
+/* ================= INPUT ================= */
+input{
+    width:100%;
+    padding:14px;
+    border:2px solid #adc1ae;
+    border-radius:12px;
+    margin-bottom:15px;
+    font-size:16px;
+}
+
+/* ================= NAVBAR ================= */
+.bottom-nav{
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    background:#2e7d32;
+    padding:15px;
+    min-height:80px;
+    color:rgb(237, 230, 230);
+}
+
+.bottom-nav div,
+.bottom-nav button{
+    color:rgb(3, 3, 3);
+    font-weight:bold;
+    cursor:pointer;
+    background:none;
+    border:none;
+    font-size:15px;
+}
+
+.bottom-nav div:hover,
+.bottom-nav button:hover{
+    transform:scale(1.08);
+}
+
+/* ================= BOTÓN CENTRAL ================= */
+.center-btn{
+    background:#75dab1 !important;
+    color:black !important;
+    padding:18px;
+    border-radius:50%;
+    font-size:18px;
+    margin-top:-30px;
+    border:4px solid white;
+    box-shadow:0 4px 12px rgba(0,0,0,.25);
+}
+
+/* ================= DETALLE ================= */
+.detalle-card{
+    background:white;
+    padding:20px;
+    border-radius:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.1);
+    text-align:left;
+}
+
+.detalle-card b{
+    color:#2e7d32;
+}
+
+/* ================= VIDEO ================= */
+video{
+    width:100%;
+    height:80vh;
+    object-fit:cover;
+    background:black;
+}
+
+/* ================= RESULTADOS ================= */
+#resultado{
+    color:#2e7d32;
+    font-size:1.5rem;
+}
+
+/* ================= RESPUESTA IA ================= */
+#respuesta{
+    margin-top:20px;
+    background:#f1f8e9;
+    padding:15px;
+    border-radius:12px;
+    text-align:left;
+}
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:600px){
+
+    .screen{
+        border-radius:0;
+        max-width:100%;
+    }
+
+    h1{
+        font-size:1.6rem;
+    }
+
+    .card{
+        flex-direction:row;
+    }
+
+    button{
+        width:100%;
+    }
+
+    .bottom-nav{
+        font-size:13px;
+    }
+}
