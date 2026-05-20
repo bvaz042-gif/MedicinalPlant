@@ -6,9 +6,10 @@
 }
 
 body{
-    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
-    background:linear-gradient(to bottom,#e8f5e9,#c8e6c9);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to bottom, #e8f5e9, #c8e6c9);
     color:#1b1b1b;
+    overflow:hidden;
 }
 
 /* ================= PANTALLAS ================= */
@@ -42,22 +43,25 @@ body{
 }
 
 /* ================= CONTENIDO ================= */
-.content{
+.content {
     padding:20px;
     text-align:center;
     overflow-y:auto;
     flex:1;
 }
-
 h1{
     color:#2e7d32;
-    font-size:2rem;
+    font-size:2.2rem;
     margin-bottom:15px;
 }
 
 h2{
     color:#388e3c;
     margin-bottom:15px;
+}
+
+h1,h2,h3{
+    letter-spacing:.5px;
 }
 
 p{
@@ -68,30 +72,31 @@ p{
 
 /* ================= BOTONES ================= */
 button{
-    background:#2e7d32;
-    color:white;
-    border:none;
+    background:#111;
+    color: #abe10b;
+    border:2px solid #c51f4b;
     padding:14px 24px;
     border-radius:14px;
     font-size:16px;
     font-weight:bold;
     cursor:pointer;
     transition:.3s;
-    margin:10px 0;
+    box-shadow:0 0 10px #0d9bdd;
 }
 
 button:hover{
-    background:#1b5e20;
-    transform:scale(1.03);
+    background:#dcded5;
+    color:#111;
+    box-shadow:0 0 20px #00ff88;
 }
-
 button:active{
     transform:scale(.95);
 }
 
 /* ================= TARJETAS ================= */
 .card{
-    background:#f1f8e9;
+    background:rgba(255,255,255,0.7);
+    backdrop-filter:blur(10px);
     padding:15px;
     margin:12px 0;
     border-radius:20px;
@@ -100,12 +105,18 @@ button:active{
     gap:15px;
     align-items:center;
     text-align:left;
-    box-shadow:0 8px 20px rgba(0,0,0,.08);
+    box-shadow:0 8px 20px rgba(0,0,0,.1);
     transition:.3s;
+    border:1px solid rgba(255,255,255,.3);
 }
 
 .card:hover{
     transform:translateY(-4px);
+    box-shadow:0 8px 18px rgba(0,0,0,.12);
+}
+
+.card:active{
+    transform:scale(.97);
 }
 
 .card img{
@@ -117,16 +128,30 @@ button:active{
 
 .card h3{
     color:#2e7d32;
+    margin-bottom:5px;
+    font-size:1.1rem;
 }
 
-/* ================= INPUT ================= */
+.card p{
+    font-size:.9rem;
+    color:#666;
+}
+
+/* ================= INPUT IA ================= */
 input{
     width:100%;
     padding:14px;
-    border:2px solid #adc1ae;
+    border:2px solid #c8e6c9;
     border-radius:12px;
     margin-bottom:15px;
     font-size:16px;
+    outline:none;
+    transition:.3s;
+}
+
+input:focus{
+    border-color:#2e7d32;
+    box-shadow:0 0 8px rgba(46,125,50,.3);
 }
 
 /* ================= NAVBAR ================= */
@@ -134,50 +159,63 @@ input{
     display:flex;
     justify-content:space-around;
     align-items:center;
-    background:#2e7d32;
-    padding:15px;
-    min-height:80px;
-    color:rgb(237, 230, 230);
+    background:rgba(255,255,255,.9);
+    backdrop-filter:blur(10px);
+    padding:14px;
+    border-top:1px solid #ddd;
 }
 
-.bottom-nav div,
-.bottom-nav button{
-    color:rgb(3, 3, 3);
-    font-weight:bold;
+.bottom-nav div{
     cursor:pointer;
-    background:none;
-    border:none;
-    font-size:15px;
+    font-size:14px;
+    color:#2e7d32;
+    font-weight:bold;
+    transition:.3s;
 }
 
-.bottom-nav div:hover,
-.bottom-nav button:hover{
-    transform:scale(1.08);
+.bottom-nav div:hover{
+    transform:scale(1.1);
 }
 
 /* ================= BOTÓN CENTRAL ================= */
 .center-btn{
-    background:#75dab1 !important;
-    color:black !important;
+    background:#2e7d32;
+    color:white !important;
     padding:18px;
     border-radius:50%;
     font-size:18px;
-    margin-top:-30px;
+    box-shadow:0 4px 12px rgba(46,125,50,.4);
+    margin-top:-35px;
     border:4px solid white;
-    box-shadow:0 4px 12px rgba(0,0,0,.25);
 }
 
-/* ================= DETALLE ================= */
+.center-btn:hover{
+    background:#1b5e20;
+}
+
+/* ================= IMÁGENES ================= */
+img{
+    max-width:100%;
+}
+
 .detalle-card{
     background:white;
     padding:20px;
     border-radius:20px;
     box-shadow:0 8px 20px rgba(0,0,0,.1);
     text-align:left;
+    margin-top:15px;
+}
+
+.detalle-card p{
+    margin-bottom:18px;
+    line-height:1.7;
+    color:#444;
 }
 
 .detalle-card b{
     color:#2e7d32;
+    font-size:17px;
 }
 
 /* ================= VIDEO ================= */
@@ -188,10 +226,11 @@ video{
     background:black;
 }
 
-/* ================= RESULTADOS ================= */
+/* ================= RESULTADO ================= */
 #resultado{
     color:#2e7d32;
-    font-size:1.5rem;
+    font-size:2rem;
+    margin-bottom:20px;
 }
 
 /* ================= RESPUESTA IA ================= */
@@ -200,30 +239,66 @@ video{
     background:#f1f8e9;
     padding:15px;
     border-radius:12px;
+    color:#333;
     text-align:left;
+    white-space:pre-line;
+}
+
+/* ================= SCROLL ================= */
+::-webkit-scrollbar{
+    width:8px;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#81c784;
+    border-radius:10px;
 }
 
 /* ================= RESPONSIVE ================= */
 @media(max-width:600px){
 
-    .screen{
-        border-radius:0;
-        max-width:100%;
-    }
-
     h1{
-        font-size:1.6rem;
+        font-size:1.8rem;
     }
 
     .card{
         flex-direction:row;
     }
 
+    .card img{
+        width:70px;
+        height:70px;
+    }
+
     button{
         width:100%;
     }
+}
+/* ====== AJUSTE VISIBILIDAD BOTONES ====== */
 
-    .bottom-nav{
-        font-size:13px;
-    }
+.screen{
+    position:relative;
+    min-height:100vh;
+}
+
+.content{
+    padding-bottom:120px;
+}
+
+.bottom-nav{
+    position:absolute;
+    bottom:0;
+    left:0;
+    width:100%;
+    z-index:9999;
+}
+
+.bottom-nav button{
+    display:block !important;
+    opacity:1 !important;
+    visibility:visible !important;
+}
+
+video{
+    height:calc(100vh - 120px);
 }
