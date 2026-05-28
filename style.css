@@ -20,12 +20,13 @@ body{
     max-width:600px;
     margin:auto;
     background:white;
-    height:100vh;
+    min-height:100vh;
     box-shadow:0 10px 30px rgba(0,0,0,.15);
     border-radius:20px;
-    overflow:hidden;
+    overflow-y:auto;
     animation:fade .3s ease;
 }
+
 
 .active{
     display:flex;
@@ -241,7 +242,10 @@ video{
     border-radius:12px;
     color:#333;
     text-align:left;
-    white-space:pre-line;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+    overflow-y:auto;
+    max-height:600px;
 }
 
 /* ================= SCROLL ================= */

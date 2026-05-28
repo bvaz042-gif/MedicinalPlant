@@ -1,20 +1,75 @@
 {
-  "name": "PlantApp",
+  "name": "PlantApp - Plantas Medicinales",
   "short_name": "PlantApp",
-  "start_url": "/",
+  "description": "Descubre plantas medicinales con inteligencia artificial. Identifica plantas usando tu cámara y aprende sus beneficios y usos tradicionales.",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "background_color": "#000000",
   "theme_color": "#2e7d32",
-  "icons": [
+  "categories": ["health", "education", "productivity"],
+  "screenshots": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "form_factor": "narrow"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "form_factor": "wide"
     }
-  ]
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Identificar Planta",
+      "short_name": "Identificar",
+      "description": "Abre la cámara para identificar una planta",
+      "url": "./?mode=camera",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Ver Catálogo",
+      "short_name": "Catálogo",
+      "description": "Explora el catálogo de plantas medicinales",
+      "url": "./?mode=catalog",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
 }

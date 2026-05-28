@@ -23,8 +23,9 @@ body {
 	max-width:600px;
 	margin:auto;
 	background:rgb(197, 215, 216);
-	height:100vh;
+	min-height:100vh;
 	flex-direction:column;
+	overflow-y:auto;
 }
 
 .active { display:flex; }
@@ -276,6 +277,7 @@ async function takePhoto(){
 
         // SI EXISTE EN TU CATÁLOGO
         if(plantaEncontrada){
+
             // abrir detalle completo
             verDetalle(plantaEncontrada);
         }else{
@@ -316,12 +318,15 @@ function preguntarIA(){
     const q = document.getElementById("pregunta").value.toLowerCase();
     const res = document.getElementById("respuesta");
 
+    // Búsqueda mejorada: nombre, científico, beneficios
     const planta = plantas.find(p =>
-        q.includes(p.nombre.toLowerCase())
+        p.nombre.toLowerCase().includes(q) ||
+        p.cientifico.toLowerCase().includes(q) ||
+        p.beneficios.some(b => b.toLowerCase().includes(q))
     );
 
     if(!planta){
-        res.innerHTML = "❌ No encontrada en la base de datos";
+        res.innerHTML = "❌ No encontrada. Intenta con:\n• Nombre (ej: Manzanilla)\n• Científico (ej: Matricaria)\n• Beneficio (ej: Digestiva)";
         return;
     }
     res.innerHTML = `
@@ -339,7 +344,7 @@ function preguntarIA(){
         ${planta.remedio}</p>
         <p><b>🧪 Ingredientes:</b><br>
         ${planta.ingredientes}</p>
-        <p><b>📌 Opcional:</b><br>
+        <p><b>📌 Recomendación:</b><br>
         ${planta.opcional}</p>
     `;
 }
@@ -937,7 +942,7 @@ function verDetalle(planta){
         </p>
         <p>
         <b>📌 Opcional:</b><br>
-        ${planta.opcional || "Sin información"}
+        ${planta.opcional}
         </p>
     </div>
     `;
