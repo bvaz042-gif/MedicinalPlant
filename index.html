@@ -23,9 +23,8 @@ body {
 	max-width:600px;
 	margin:auto;
 	background:rgb(197, 215, 216);
-	min-height:100vh;
+	height:100vh;
 	flex-direction:column;
-	overflow-y:auto;
 }
 
 .active { display:flex; }
@@ -225,7 +224,7 @@ async function takePhoto(){
     show("screen5");
 
     // TU API KEY
-	const API_KEY = "2b1013D7FFmEp5FXPdwK6FD2";
+	const API_KEY = "2b10qGmrMfDkOrs2Xgqtg4hc9";
     const formData = new FormData();
     formData.append("images", blob);x
 
@@ -235,7 +234,7 @@ async function takePhoto(){
     try{
 
         const res = await fetch(
-            `https://my-api.plantnet.org/v2/identify/all?api-key=${API_KEY}`,
+            `https://my.plantnet.org/settings/api-key/${API_KEY}`,
             {
                 method:"POST",
                 body:formData
@@ -277,7 +276,6 @@ async function takePhoto(){
 
         // SI EXISTE EN TU CATÁLOGO
         if(plantaEncontrada){
-
             // abrir detalle completo
             verDetalle(plantaEncontrada);
         }else{
@@ -318,15 +316,12 @@ function preguntarIA(){
     const q = document.getElementById("pregunta").value.toLowerCase();
     const res = document.getElementById("respuesta");
 
-    // Búsqueda mejorada: nombre, científico, beneficios
     const planta = plantas.find(p =>
-        p.nombre.toLowerCase().includes(q) ||
-        p.cientifico.toLowerCase().includes(q) ||
-        p.beneficios.some(b => b.toLowerCase().includes(q))
+        q.includes(p.nombre.toLowerCase())
     );
 
     if(!planta){
-        res.innerHTML = "❌ No encontrada. Intenta con:\n• Nombre (ej: Manzanilla)\n• Científico (ej: Matricaria)\n• Beneficio (ej: Digestiva)";
+        res.innerHTML = "❌ No encontrada en la base de datos";
         return;
     }
     res.innerHTML = `
@@ -344,8 +339,8 @@ function preguntarIA(){
         ${planta.remedio}</p>
         <p><b>🧪 Ingredientes:</b><br>
         ${planta.ingredientes}</p>
-        <p><b>📌 Recomendación:</b><br>
-        ${planta.opcional}</p>
+        <p><b>📌 Recomendacion:</b><br>
+        ${planta.recomendacion}</p>
     `;
 }
 
@@ -360,7 +355,7 @@ const plantas = [
 	beneficios:["Relajante","Digestiva","Antiinflamatoria","Mejora el sueño","Alivio de cólicos menstruales"],
 	remedio: "Té de manzanilla." ,
 	ingredientes: "1 cucharada de flores de manzanilla. 1 taza de agua caliente. Hervir el agua. Agregar la manzanilla. Dejar reposar de 5 a 10 minutos. Colar y beber tibio.",
-	ocional:"agregar miel o limón.  Recomendación No consumir en exceso y evitar usarla si eres alérgico a plantas similares como margaritas o crisantemos.",
+	recomendacion:"No consumir en exceso y evitar su uso en grandes cantidades durante el embarazo, ya que la manzanilla contiene compuestos que, en dosis muy altas o concentradas (como extractos o aceites esenciales), pueden actuar como un estimulante uterino y aumentar el riesgo de complicaciones. Sin embargo, el consumo moderado de té de manzanilla generalmente se considera seguro durante el embarazo. Siempre es recomendable consultar con un profesional de la salud antes de consumir cualquier planta medicinal durante el embarazo."
 },
 {
 	nombre:"Menta",
@@ -370,8 +365,8 @@ const plantas = [
 	uso:"Infusiones y cocina, Refresca y ayuda a la digestión.",
     beneficios:["Digestiva","Refrescante","Beneficios respiratorios","Beneficios para el sistema nervioso y bienestar","Beneficios cardiovasculares y musculares","Beneficios en la piel y cuidado personal","Usos prácticos."],
 	remedio: "Té de menta",
-    ingredientes:"5 a 10 hojas de menta fresca. 1 taza de agua caliente. Hervir el agua. Agregar las hojas de menta. Dejar reposar 5 minutos. Colar y beber tibio.",
-	ocional:"agregar miel o limón.",
+    ingredientes:"5 a 10 hojas de menta fresca. 1 taza de agua caliente. Hervir el agua. Agregar las hojas de menta. Dejar reposar 5 minutos. Colar y beber tibio. Agregar miel o limón",
+	recomendacion:"No consumir en exceso y evitar su uso en grandes cantidades durante el embarazo, ya que la menta (especialmente en forma de aceites esenciales o extractos concentrados) puede actuar como un estimulante del flujo sanguíneo en la zona pélvica y el útero, lo que podría aumentar el riesgo de complicaciones."
 },
 {
 	nombre:"Romero",
@@ -381,8 +376,8 @@ const plantas = [
 	uso:"Cocina y aceites, Mejora memoria y circulación.",
 	beneficios:["Memoria","Antioxidante","Mejora la digestión","Antiflamatorio","Beneficios cardiovasculares","Cuidado de la piel y cabello"],
 	remedio: "Té de romero",
-    ingredientes: "1 rama pequeña de romero o 1 cucharadade hojas. 1taza de agua caliente  ",
-    opcional:"No consumir en exceso y evitar usar grandes cantidades durante el embarazo.",
+    ingredientes: "1 rama pequeña de romero o 1 cucharadade hojas. 1taza de agua caliente ",
+    recomendacion:"No consumir en exceso y evitar su uso en grandes cantidades durante el embarazo, ya que el romero contiene compuestos (como el alcanfor) que estimulan el flujo sanguíneo en el área pélvica y el útero, lo que podría inducir contracciones o sangrados.",
 },
 {
 	nombre:"Lavanda",
@@ -393,7 +388,7 @@ const plantas = [
 	beneficios:["Relajante","Antiestrés","Mejora del sueño","Alivio de dolores y molestias","Beneficios digestivos","Cuidado de la piel",],
     remedio: "Té de lavanda",
     ingredientes: "1 cucharada de flores de lavanda. 1 taza de agua caliente",
-    opcional:"No consumir en exceso y evitar durante el embarazo sin consultar a un especialista.",
+    recomendacion:"No consumir en exceso y evitar durante el embarazo sin consultar a un especialista.",
 },
 {
 	nombre:"Sabila",
@@ -404,7 +399,7 @@ const plantas = [
 	beneficios:["Cicatrizante","Hidratante","Hidratación de la piel","Ayuda en la Digestión","Salud ocular."],
     remedio: "Bebida de sábila",
     ingredientes: "Gel transparente de una hoja de sábila. 1 vaso de agua o jugo natural.",
-    opcional:"No consumir en exceso porque puede causar malestar estomacal.",
+    recomendacion:"No consumir en exceso porque puede causar malestar estomacal.",
 },
 {
 	nombre:"Eucalipto",
@@ -415,7 +410,7 @@ const plantas = [
 	beneficios:["Descongestionante","Antiséptico","Antioxidante","Antiinflamatorio"],
     remedio: "Vapor de eucalipto",
     ingredientes: "Unas hojas de eucalipto.Agua caliente.",
-    opcional:"Tener cuidado con el vapor caliente para evitar quemaduras.",
+    recomendacion:"Tener cuidado con el vapor caliente para evitar quemaduras.",
 },
 {
 	nombre:"Caléndula",
@@ -426,7 +421,7 @@ const plantas = [
 	beneficios:["Cicatrizante","Antiinflamatoria","Antioxidante","Antiarrugas","Antibacteriana"],
     remedio: "Té de caléndula",
     ingredientes: "1 cucharada de flores de caléndula. 1 taza de agua caliente.",
-    opcional:"No consumir en exceso y suspender su uso si causa alergia.",
+    recomendacion:"No consumir en exceso y suspender su uso si causa alergia.",
 },
 {
 	nombre:"Valeriana",
@@ -437,7 +432,7 @@ const plantas = [
 	beneficios:["Sedante","Antiestrés","Antidepresivo","Antidepresivo"],
     remedio: "Té de valeriana",
     ingredientes: "1 cucharadita de raíz de valeriana. 1 taza de agua caliente.",
-    opcional:"No consumir en exceso porque puede causar sueño.",
+    recomendacion:"No consumir en exceso porque puede causar sueño.",
 },
 {
 	nombre:"Ginseng",
@@ -448,7 +443,7 @@ const plantas = [
 	beneficios:["Energizante","Mejora concentración","Reducción del Estrés y la Ansiedad","Fortalecimiento del Sistema Inmunológico"],
     remedio: "Té de ginseng",
     ingredientes: "1 trozo pequeño de raíz de ginseng. 1 taza de agua caliente.",
-    opcional:"Evitar consumir por la noche.",
+    recomendacion:"Evitar consumir por la noche.",
 },
 {
 	nombre:"Árnica",
@@ -459,7 +454,7 @@ const plantas = [
 	beneficios:["Antiinflamatoria","Analgésica","Alivia contusiones y dolores musculares","Reduce moretones"],
     remedio: "Infusión de árnica",
     ingredientes: "Flores de árnica. 1 taza de agua caliente.",
-    opcional:"No beber la infusión.",
+    recomendacion:"No consumir por vía oral y evitar por completo su uso interno durante el embarazo (y en general).",
 },
 {
 	nombre:"Epazote",
@@ -470,7 +465,7 @@ const plantas = [
 	beneficios:["Alivia gases y cólicos","Combate parásitos intestinales","Reduce inflamación respiratoria","Ayuda en trastornos menstruales"],
     remedio: "Té de epazote",
     ingredientes: "Unas hojas de epazote. 1 taza de agua caliente.",
-    opcional:"No consumir en exceso.",
+    recomendacion:"El epazote contiene ascaridol, un compuesto químico que en dosis concentradas es altamente tóxico. Antiguamente se usaba como remedio casero para eliminar parásitos, pero la línea entre la dosis curativa y la dosis tóxica es sumamente delgada.",
 },
 {
 	nombre:"Bugambilia",
@@ -481,7 +476,7 @@ const plantas = [
 	beneficios:["ayuda a aliviar irritación de garganta","Alivia la tos","Alivia dolores musculares"],
     remedio: "Té de bugambilia",
     ingredientes: "Flores de bugambilia. 1 taza de agua caliente.",
-    opcional:"Consumir moderadamente.",
+    recomendacion:"No consumir en exceso y evitar su uso en grandes cantidades durante el embarazo, ya que a la bugambilia (especialmente las flores de color rústico, fucsia o morado).",
 },
 {
 	nombre:"Nopal",
@@ -490,9 +485,9 @@ const plantas = [
 	descripcion:"El nopal es una planta suculenta originaria de México, conocida por sus propiedades medicinales y nutricionales. Es rico en fibra, vitaminas y minerales, lo que lo convierte en un alimento beneficioso para la salud. El nopal se ha utilizado tradicionalmente para ayudar a controlar los niveles de azúcar en la sangre, mejorar la digestión y reducir el colesterol. Además, tiene propiedades antiinflamatorias y antioxidantes, lo que puede contribuir a la salud cardiovascular y al bienestar general.",
 	uso:"Se consume en ensaladas, jugos y suplementos para controlar azúcar, mejorar digestión y reducir colesterol.",
 	beneficios:["Controla azúcar en sangre","Mejora digestión","Reduce colesterol","Propiedades antiinflamatorias y antioxidantes"],
-	remedio: "Jugo de nopal",
-    ingredientes: "1 nopal limpio. 1 vaso de agua",
-	opcional: "Consumir recién preparado."
+	remedio:"Jugo de nopal",
+    ingredientes: "E1 nopal limpio. 1 vaso de agua",
+	recomendacion:"El nopal es un alimento extraordinario y completamente seguro cuando se consume de forma normal en la dieta diaria."
 },
 {
 	nombre:"Diente de leon",
@@ -503,7 +498,7 @@ const plantas = [
 	beneficios:["Diurético","Depurativo","Mejora la digestión","Apoya la salud del hígado","Antioxidante"],
 	remedio: "Té de bugambilia",
     ingredientes: "1 cucharada de hojas secas.1 taza de agua caliente.",
-    opcional:"No consumir en exceso.",
+    recomendacion:"No consumir en exceso y evitar su uso en dosis medicinales o concentradas durante el embarazo.."
 },
 {
 	nombre:"Cola de caballo",
@@ -514,7 +509,7 @@ const plantas = [
 	beneficios:["Diurética","Fortalece huesos","Mejora cabello y uñas","Depurativa"],
 	remedio: "Té de cola de caballo",
     ingredientes: "1 cucharada de cola de caballo. 1 taza de agua caliente.",
-    opcional:"Consumir moderadamente.",
+    recomendacion:"La cola de caballo es uno de los diuréticos naturales más potentes que existen, pero su uso requiere mucha precaución.",
 },
 {
 	nombre:"Toronjil",
@@ -525,7 +520,7 @@ const plantas = [
 	beneficios:["Relajante","Ansiolítica","Mejora el sueño","Digestiva"],
 	remedio: "Consumir moderadamente.",
     ingredientes: "Hojas de toronjil. 1 taza de agua caliente.",
-    opcional:"ayuda a relajarse",
+    recomendacion:"se le atribuyen propiedades que pueden estimular el útero o alterar el tono muscular de la zona pélvica si se toma en dosis muy altas o concentradas.."
 	
 },
 {
@@ -537,7 +532,7 @@ const plantas = [
 	beneficios:["Antiinflamatoria","Suavizante","Alivia la tos","Protege mucosas"],
 	remedio: "Té de malva",
     ingredientes: "Flores o hojas de malva.1 taza de agua caliente.",
-    opcional:"Consumir moderadamente.",
+    recomendacion:"carece de estudios científicos suficientes que garanticen su total seguridad para el desarrollo del feto en dosis elevadas.",
 },
 {
 	nombre:"Estafiate",
@@ -548,7 +543,8 @@ const plantas = [
 	beneficios:["Digestiva","Antiparasitaria","Antiinflamatoria","Alivia cólicos"],
 	remedio: "Té de estafiate",
     ingredientes: "Unas hojas de estafiate. 1 taza de agua caliente.",
-    opcional:"No consumir en exceso.",
+    recomendacion:"No consumir por vía oral y evitar por completo su uso durante el embarazo (y en general en dosis medicinales).",
+
 },
 {
 	nombre:"Muicle",
@@ -559,7 +555,7 @@ const plantas = [
 	beneficios:["Antioxidante","Depurativo","Mejora la circulación","Fortalece la sangre"],
 	remedio: "Té de muicle",
     ingredientes: "Hojas de muicle. 1 taza de agua caliente.",
-    opcional:"Consumir moderadamente.",
+    recomendacion:"No consumir en exceso y evitar su uso en grandes cantidades durante el embarazo, ya que al muicle se le atribuyen propiedades emenagogas, lo que significa que puede estimular la circulación sanguínea en la zona pélvica y provocar contracciones en el útero si se toma en dosis elevadas o muy concentradas..",
 },
 {
 	nombre:"Ortiga",
@@ -570,7 +566,7 @@ const plantas = [
 	beneficios:["Antiinflamatoria","Depurativa","Mejora la circulación","Fortalece el sistema inmunológico"],
 	remedio: "Té de ortiga",
     ingredientes: "1 cucharada de hojas de ortiga. 1 taza de agua caliente.",
-    opcional:"Manipular con cuidado las hojas frescas.",
+    recomendacion:"No consumir en exceso y evitar por completo su uso interno durante el embarazo (y en dosis medicinales si se padecen ciertas condiciones).",
 },
 {
 	nombre:"Ánis",
@@ -581,7 +577,7 @@ const plantas = [
 	beneficios:["Digestivo","Carminativo","Alivia gases","Reduce cólicos"],
 	remedio: "Té de anís",
     ingredientes: "1 cucharadita de semillas de anís. 1 taza de agua caliente.",
-    opcional:"No consumir en exceso.",
+    recomendacion:"No consumir en exceso y evitar su uso en grandes cantidades durante el embarazo (y por completo en recién nacidos).",
 },
 {
 	nombre:"Hinojo",
@@ -592,7 +588,7 @@ const plantas = [
 	beneficios:["Digestivo","Antioxidante","Alivia molestias estomacales","Reduce inflamación"],
 	remedio: "Té de hinojo",
     ingredientes: "1 cucharadita de semillas de hinojo. 1 taza de agua caliente.",
-    opcional:"Consumir moderadamente.",
+    recomendacion:"No consumir en exceso y evitar su uso en grandes cantidades durante el embarazo (y por completo en recién nacidos).",
 },
 {
 	nombre:"Laurel",
@@ -603,7 +599,7 @@ const plantas = [
 	beneficios:["Digestivo","Antiinflamatorio","Mejora la circulación","Alivia molestias estomacales"],
 	remedio: "Té de laurel",
     ingredientes: "2 hojas de laurel. 1 taza de agua caliente.",
-    opcional:"No consumir en exceso.",
+    recomendacion:"No consumir en exceso y evitar su uso en grandes cantidades durante el embarazo, ya que al laurel se le atribuyen propiedades emenagogas, lo que significa que puede estimular el flujo sanguíneo en la zona pélvica y el útero, aumentando el riesgo de provocar contracciones o sangrados si se toma en dosis elevadas..",
 },
 {
 	nombre:"Jengibre",
@@ -614,7 +610,7 @@ const plantas = [
 	beneficios:["Antiinflamatorio","Digestivo","Fortalece el sistema inmunológico","Alivia náuseas"],
 	remedio: "Té de jengibre",
     ingredientes: "1 trozo pequeño de jengibre. 1 taza de agua caliente.",
-    opcional:"Puede agregarse limón o miel.",
+    recomendacion:"No consumir en exceso y evitar su uso en grandes cantidades durante el embarazo, ya que el jengibre contiene compuestos activos muy potentes.",
 },
 {
 	nombre:"Ajo",
@@ -625,7 +621,7 @@ const plantas = [
 	beneficios:["Antibacteriano","Cardiovascular","Fortalece el sistema inmunológico","Mejora la circulación"],
 	remedio: "Remedio de ajo",
     ingredientes: "1 diente de ajo. 1 vaso de agua tibia.",
-    opcional:"Consumir en poca cantidad.",
+    recomendacion:"No consumir en exceso y evitar su uso en grandes cantidades durante el embarazo, ya que el ajo contiene compuestos activos muy potentes.",
 },
 {
 	nombre:"Perejil",
@@ -636,7 +632,7 @@ const plantas = [
 	beneficios:["Diurético","Antioxidante","Apoya la salud renal","Mejora la digestión"],
 	remedio: "Té de perejil",
     ingredientes: "Unas ramas de perejil. 1 taza de agua caliente.",
-    opcional:"No consumir en exceso.",
+    recomendacion:"No consumir en exceso y evitar por completo su uso en dosis medicinales o concentradas durante el embarazo..",
 },
 {
 	nombre:"Tomillo", 
@@ -647,7 +643,7 @@ const plantas = [
 	beneficios:["Alivia afecciones respiratorias","Antibacteriano","Fortalece el sistema inmunológico","Combate el acné","cuida la piel","Mejora la circulación"],
 	remedio: "Té de tomillo",
     ingredientes: "1 cucharadita de tomillo. 1 taza de agua caliente.",
-    opcional:"Puede mezclarse con miel.",
+    recomendacion:"No consumir en exceso y evitar su uso en dosis medicinales o concentradas durante el embarazo.",
 },
 {
 	nombre:"Salvia",
@@ -658,7 +654,7 @@ const plantas = [
 	beneficios:["Propiedades antioxidantes y cognitivas","Beneficios para piel y cabello","Propiedades digestivas y metabólicas","Nutrientes y composición"],
 	remedio: "Té de salvia",
     ingredientes: "Hojas de salvia. 1 taza de agua caliente.",
-    opcional:"Consumir moderadamente.",
+    recomendacion:"No consumir por vía oral y evitar por completo su uso en dosis medicinales o concentradas durante el embarazo..",
 },
 {
 	nombre:"Hoja de guayaba",
@@ -669,7 +665,7 @@ const plantas = [
 	beneficios:["Antimicrobiana","Digestiva","Alivia diarrea","Reduce dolor estomacal"],
 	remedio: "Té de hoja de guayaba",
     ingredientes: "5-7 hojas frescas o 1 cucharadita de hojas secas de guayaba. 1 taza de agua.",
-    opcional:"Consumir máximo 2 tazas al día .",
+    recomendacion:"Consumir máximo 2 tazas al día .",
 },
 {
 	nombre:"Limón",
@@ -680,7 +676,7 @@ const plantas = [
 	beneficios:["Antioxidante","Rico en vitamina C","Fortalece el sistema inmunológico","Mejora la digestión"],
 	remedio: "Té de limón",
     ingredientes: "3-4 hojas frescas o 1 rodaja fina de limón. 1 taza de agua caliente.",
-    opcional:"No exceder 2 tazas diarias; evitar en gastritis.",
+    recomendacion:"No exceder 2 tazas diarias; evitar en gastritis.",
 },
 {
 	nombre:"Siempre viva",
@@ -691,7 +687,7 @@ const plantas = [
 	beneficios:["Antiinflamatoria","Cicatrizante","Alivia irritaciones","Regenera la piel"],
 	remedio: "Té de siempreviva",
     ingredientes: "1 cucharada de flores o hojas secas.1 taza de agua.",
-    opcional:"Usar por periodos cortos; consultar si hay problemas hepáticos.",
+    recomendacion:"Usar por periodos cortos; consultar si hay problemas hepáticos.",
 },
 {
 	nombre:"Marrubio",
@@ -702,7 +698,7 @@ const plantas = [
 	beneficios:["Expectorante","Digestiva","Alivia la tos","Reduce problemas digestivos"],
 	remedio: "Té de marrubio",
     ingredientes: "1 cucharadita de hojas secas o 3-4 frescas. 1 taza de agua.",
-    opcional:"Máximo 2 tazas al día; no usar en embarazo .",
+    recomendacion:"Máximo 2 tazas al día; no usar en embarazo .",
 },
 {
 	nombre:"Prodigiosa",
@@ -713,7 +709,7 @@ const plantas = [
 	beneficios:["Digestiva","Hepática","Apoya la función hepática","Mejora la digestión"],
 	remedio: "Té de prodigiosa",
     ingredientes: "1 cucharadita de hojas secas. 1 taza de agua.",
-    opcional:"tomar antes de comer; no mezclar con medicamentos para diabetes.",
+    recomendacion:"tomar antes de comer; no mezclar con medicamentos para diabetes.",
 },
 {
 	nombre:"Pingüica",
@@ -724,7 +720,7 @@ const plantas = [
 	beneficios:["Diurética","Antiinflamatoria","Apoya riñones","Alivia vías urinarias"],
 	remedio: "Té de pingüica",
     ingredientes: "1 cucharada de hojas o frutos secos. 1 taza de agua.",
-    opcional:"Hasta 2 tazas al día; ayuda al sistema urinario. ",
+    recomendacion:"Hasta 2 tazas al día; ayuda al sistema urinario. ",
 },
 {
 	nombre:"Toloache",
@@ -735,7 +731,7 @@ const plantas = [
 	beneficios:["Sedante","Analgésico","Efectos alucinógenos","Antiflamatorio"],
 	remedio: "Té de toloache",
     ingredientes: "1 cucharadita de hojas secas (muy poca cantidad).1 taza de agua.",
-    opcional:"Muy tóxico en exceso: solo bajo indicación, 1 taza como máximo; prohibido en niños y embarazo.",
+    recomendacion:"Muy tóxico en exceso: solo bajo indicación, 1 taza como máximo; prohibido en niños y embarazo.",
 },
 {
 	nombre:"Tila",
@@ -746,7 +742,7 @@ const plantas = [
 	beneficios:["Relajante","Calmante","Reduce el estrés","Mejora el sueño"],
 	remedio: "Té de tila",
     ingredientes: "1 cucharada de flores secas. 1 taza de agua.",
-    opcional:"Ideal para dormir; 1-2 tazas al día.",
+    recomendacion:"Ideal para dormir; 1-2 tazas al día.",
 },
 {
 	nombre:"Equinacea",
@@ -757,7 +753,7 @@ const plantas = [
 	beneficios:["Inmunoestimulante","Previene infecciones respiratorias","Alivia síntomas de resfriado"],
 	remedio: "Té de equinácea",
     ingredientes: "1 cucharadita de hojas, flores o raíz seca.1 taza de agua.",
-    opcional:"Usar solo 2-3 semanas seguidas; refuerza defensas .",
+    recomendacion:"Usar solo 2-3 semanas seguidas; refuerza defensas .",
 },
 {
 	nombre:"Tepozan",
@@ -768,7 +764,7 @@ const plantas = [
 	beneficios:["Antiinflamatorio","Cicatrizante","Alivia irritaciones","Regenera la piel"],
 	remedio: "Té de tepozán",
     ingredientes: "1 cucharada de hojas secas. 1 taza de agua.",
-    opcional:"1-2 tazas al día; ayuda en problemas respiratorios .",
+    recomendacion:"1-2 tazas al día; ayuda en problemas respiratorios .",
 },
 {
 	nombre:"Hierbabuena",
@@ -779,7 +775,7 @@ const plantas = [
 	beneficios:["Digestiva","Antiinflamatoria","Relajante","Cardiovasculares","Antioxidantes"],
 	remedio: "Té de hierbabuena",
     ingredientes: "8-10 hojas frescas o 1 cucharadita secas. 1 taza de agua.",
-    opcional:"Fácil digestión; 1-2 tazas al día.",
+    recomendacion:"Fácil digestión; 1-2 tazas al día.",
 },
 {
 	nombre:"Hierba del sapo",
@@ -790,7 +786,7 @@ const plantas = [
 	beneficios:["Apoya la salud cardiovascular","Reduce niveles de colesterol","Mejora la circulación"],
 	remedio: " Té de hierba del sapo",
     ingredientes: "1 cucharadita de planta seca. 1 taza de agua.",
-    opcional:"No más de 2 meses seguidos; ayuda a la digestión.",
+    recomendacion:"No más de 2 meses seguidos; ayuda a la digestión.",
 },
 {
 	nombre:"Albahaca",
@@ -801,7 +797,7 @@ const plantas = [
 	beneficios:["Digestiva","Antiinflamatoria","Relajante","Cardiovasculares","Antioxidantes"],
 	remedio: "Té de albahaca",
     ingredientes: "6-8 hojas frescas o 1 cucharada secas.1 taza de agua.",
-    opcional:"Calma nervios y estómago; 1 taza al día.",
+    recomendacion:"Calma nervios y estómago; 1 taza al día.",
 },
 {
 	nombre:"Oregano",
@@ -812,7 +808,7 @@ const plantas = [
 	beneficios:["Antibacteriana","Antioxidante","Digestiva","Salud respiratoria","Salud articular y muscular"],
 	remedio: "Té de orégano",
     ingredientes: "1 ramita fresca o 1 cucharadita seca. 1 taza de agua.",
-    opcional:"Para resfriados y digestión; máximo 2 tazas al día .",
+    recomendacion:"Para resfriados y digestión; máximo 2 tazas al día .",
 },
 {
 	nombre:"Chicalote",
@@ -823,7 +819,7 @@ const plantas = [
 	beneficios:["Analgésico","Sedante","Antiinflamatorio","Alivia la tos","Expectorante","Antibiotico natural"],
 	remedio: "26. Té de chicalote",
     ingredientes: "1 cucharadita de hojas o flores secas.1 taza de agua.",
-    opcional:"Tóxico en dosis altas: muy poca cantidad; prohibido en embarazo y niños.",
+    recomendacion:"Tóxico en dosis altas: muy poca cantidad; prohibido en embarazo y niños.",
 },
 {
 	nombre:"Pericon",
@@ -834,7 +830,7 @@ const plantas = [
 	beneficios:["Digestivo","Antiespasmódico","Relajante","Reduce cólicos"],
 	remedio: "Té de pericón",
     ingredientes: "1 cucharadita de hojas secas o 3-4 frescas.1 taza de agua.",
-    opcional:"Para digestión y dolores; moderar consumo.",
+    recomendacion:"Para digestión y dolores; moderar consumo.",
 },
 {
 	nombre:"Ajenjo/Hieba Maestra",
@@ -845,7 +841,7 @@ const plantas = [
 	beneficios:["Digestivo","Antiparasitario","Estimula el apetito","Antiinflamatorio"],
 	remedio: "Té de ajenjo",
     ingredientes: "½ cucharadita de hojas secas (muy poco).1 taza de agua.",
-    opcional:"Amargo y fuerte: solo 1 taza al día, por poco tiempo; no usar en embarazo.",
+    recomendacion:"Amargo y fuerte: solo 1 taza al día, por poco tiempo; no usar en embarazo.",
 },
 {
 	nombre:"Uña de gato",
@@ -856,7 +852,7 @@ const plantas = [
 	beneficios:["Antiinflamatoria","Fortalece el sistema inmunológico","Antioxidante","Apoya articulaciones"],
 	remedio: "Té de uña de gato",
     ingredientes: "1 cucharadita de corteza o hojas secas. 1 taza de agua.",
-    opcional:"Defensas y articulaciones; no mezclar con medicamentos.",
+    recomendacion:"Defensas y articulaciones; no mezclar con medicamentos.",
 },
 {
 	nombre:"Mozoquelite",
@@ -867,7 +863,7 @@ const plantas = [
 	beneficios:["Digestivo","Depurativo","Antiinflamatorio","Alivia malestares estomacales"],
 	remedio: "Té de mozoquelite",
     ingredientes: "1 cucharada de hojas frescas o 1 cucharadita secas. 1 taza de agua.",
-    opcional:"Digestivo y diurético; consumir con moderación.",
+    recomendacion:"Digestivo y diurético; consumir con moderación.",
 },
 {
 	nombre:"Espada de Rey",
@@ -878,7 +874,7 @@ const plantas = [
 	beneficios:["Antiinflamatorio","Cicatrizante","Alivia heridas","Apoya molestias musculares"],
 	remedio: "Té de espada del rey",
     ingredientes: "1 cucharadita de hojas o tallos secos. 1 taza de agua.",
-    opcional:"Usos tradicionales; no exceder dosis.",
+    recomendacion:"Usos tradicionales; no exceder dosis.",
 }
 ];
 
@@ -897,7 +893,7 @@ function mostrarCatalogo(){
 				<h3>${p.nombre}</h3>
 				<p>${p.cientifico}</p>
 				<p>${p.remedio}</p>
-				<p>${p.opcional}</p>
+				<p>${p.recomendacion}</p>
 			</div>
 		</div>`;
 	});
@@ -941,8 +937,8 @@ function verDetalle(planta){
         ${planta.ingredientes}
         </p>
         <p>
-        <b>📌 Opcional:</b><br>
-        ${planta.opcional}
+        <b>📌 Recomendacion:</b><br>
+        ${planta.recomendacion}
         </p>
     </div>
     `;
